@@ -1,11 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const nodemailer = require('nodemailer');
 const fs = require('fs').promises;
 const path = require('path');
 const cron = require('node-cron');
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -21,6 +22,32 @@ let settings = {
     message: 'Hello,\n\nWe found a target result in {{platform}}\'s search suggestions!\n\nCompany: {{companyName}}\nBase Keyword: {{baseKeyword}}\nTarget Result: {{targetResult}}\nFirst Found: {{foundDate}}\n\nBest regards,\nKeyword Verification System'
   }
 };
+
+// Chrome executable paths for different environments
+const CHROME_PATHS = {
+  LINUX: '/usr/bin/google-chrome',  // Render's Linux environment
+  MAC: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  WIN: 'C:\\Program Files\\Google Chrome\\Application\\chrome.exe'
+};
+
+async function initBrowser() {
+  try {
+    return await puppeteer.launch({
+      executablePath: CHROME_PATHS.LINUX,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu'
+      ],
+      headless: 'new'
+    });
+  } catch (error) {
+    console.error('Failed to launch browser:', error);
+    throw error;
+  }
+}
 
 // Load data from file
 async function loadData() {
@@ -154,17 +181,7 @@ function isExactMatch(suggestion, targetResult) {
 async function checkGoogleAutosuggest(tracking) {
   console.log('Checking Google autosuggest for:', tracking.baseKeyword);
   
-  const browser = await puppeteer.launch({ 
-    headless: "new",
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--disable-gpu',
-      '--window-size=1920x1080'
-    ]
-  });
+  const browser = await initBrowser();
   
   try {
     const page = await browser.newPage();
@@ -250,10 +267,7 @@ async function checkGoogleAutosuggest(tracking) {
 async function checkBingAutosuggest(tracking) {
   console.log('Checking Bing autosuggest for:', tracking.baseKeyword);
   
-  const browser = await puppeteer.launch({ 
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+  const browser = await initBrowser();
   
   try {
     const page = await browser.newPage();
@@ -284,10 +298,7 @@ async function checkBingAutosuggest(tracking) {
 async function checkYouTubeAutosuggest(tracking) {
   console.log('Checking YouTube autosuggest for:', tracking.baseKeyword);
   
-  const browser = await puppeteer.launch({ 
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+  const browser = await initBrowser();
   
   try {
     const page = await browser.newPage();
