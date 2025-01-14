@@ -1,0 +1,26 @@
+services:
+  # Backend API service
+  - type: web
+    name: keyword-verification-api
+    env: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: PORT
+        value: 3000
+
+  # Frontend React app
+  - type: web
+    name: keyword-verification-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://keyword-verification-api.onrender.com # Will need to be updated after API is deployed

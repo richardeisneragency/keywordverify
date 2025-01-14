@@ -1,0 +1,7 @@
+{
+  "agencyEmails": [],
+  "emailTemplate": {
+    "subject": "Keyword Match Found - {{platform}}",
+    "message": "Hello,\n\nWe found a target result in {{platform}}'s search suggestions!\n\nCompany: {{companyName}}\nBase Keyword: {{baseKeyword}}\nTarget Result: {{targetResult}}\nFirst Found: {{foundDate}}\n\nBest regards,\nKeyword Verification System"
+  }
+}

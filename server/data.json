@@ -1,0 +1,62 @@
+[
+  {
+    "id": "1736821244018",
+    "companyName": "5d ultrasound knoxville ",
+    "contactName": "",
+    "email": "",
+    "phone": "",
+    "platforms": {
+      "google": true,
+      "bing": false,
+      "youtube": false
+    },
+    "keywordTracking": [
+      {
+        "baseKeyword": "5d ultrasound knoxville ",
+        "targetResult": "5d ultrasound knoxville toes to nose",
+        "id": "1736821274029",
+        "status": {
+          "google": true,
+          "bing": false,
+          "youtube": false
+        },
+        "firstAppearance": {
+          "google": "2025-01-14T02:21:26.390Z",
+          "bing": null,
+          "youtube": null
+        },
+        "lastChecked": "2025-01-14T02:21:26.390Z"
+      }
+    ]
+  },
+  {
+    "id": "1736821304579",
+    "companyName": "commercial solar orange county",
+    "contactName": "",
+    "email": "",
+    "phone": "",
+    "platforms": {
+      "google": true,
+      "bing": false,
+      "youtube": false
+    },
+    "keywordTracking": [
+      {
+        "baseKeyword": "commercial solar orange county",
+        "targetResult": "commercial solar orange county rep solar",
+        "id": "1736821326546",
+        "status": {
+          "google": true,
+          "bing": false,
+          "youtube": false
+        },
+        "firstAppearance": {
+          "google": "2025-01-14T02:22:25.311Z",
+          "bing": null,
+          "youtube": null
+        },
+        "lastChecked": "2025-01-14T02:22:25.311Z"
+      }
+    ]
+  }
+]
