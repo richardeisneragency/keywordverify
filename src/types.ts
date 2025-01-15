@@ -14,9 +14,17 @@ export interface KeywordTracking {
   id: string;
   baseKeyword: string;  // The keyword to search for
   targetResult: string;  // The result we want to see in autosuggest
-  status: PlatformStatus;
-  firstAppearance: PlatformDates;
-  lastChecked: string;
+  status: {
+    google?: boolean;
+    bing?: boolean;
+    youtube?: boolean;
+  };
+  firstAppearance: {
+    google: string | null;
+    bing: string | null;
+    youtube: string | null;
+  };
+  lastChecked: string | null;
 }
 
 export interface Client {
@@ -24,7 +32,13 @@ export interface Client {
   companyName: string;
   contactName: string;
   email: string;
+  emails: string[];
   phone: string;
-  platforms: PlatformStatus;
+  notifyClient: boolean;
+  platforms: {
+    google: boolean;
+    bing: boolean;
+    youtube: boolean;
+  };
   keywordTracking: KeywordTracking[];
 }

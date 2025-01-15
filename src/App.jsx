@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ThemeProvider, 
   CssBaseline, 
@@ -11,14 +11,44 @@ import {
   Typography,
   Button,
   Paper,
-  CircularProgress
+  CircularProgress,
+  Tab,
+  Tabs
 } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import ClientForm from './components/ClientForm';
 import KeywordTrackingForm from './components/KeywordTrackingForm';
 import AgencySettings from './components/AgencySettings';
-import { Client } from './types';
+import { Client, KeywordTracking } from './types';
+import { API_URL } from './config';
+import { api } from './services/api';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
 
 const theme = createTheme({
   palette: {
@@ -33,8 +63,13 @@ const theme = createTheme({
 });
 
 function App() {
+  const [value, setValue] = useState(0);
   const [clients, setClients] = useState<Client[]>([]);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'success' | 'error';
+  }>({ open: false, message: '', severity: 'success' });
   const [expandedClients, setExpandedClients] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,41 +77,46 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchClients();
+    loadClients();
   }, []);
 
-  const filteredClients = clients.filter(client => 
-    client.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.contactName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const fetchClients = async () => {
+  const loadClients = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/clients');
-      const data = await response.json();
-      setClients(data);
+      const response = await fetch(`${API_URL}/api/clients`);
+      if (!response.ok) {
+        throw new Error('Failed to load clients');
+      }
+      const loadedClients = await response.json();
+      setClients(loadedClients);
     } catch (error) {
-      console.error('Error fetching clients:', error);
-      setError('Failed to fetch clients');
+      console.error('Error loading clients:', error);
+      setError('Failed to load clients');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddClient = async (clientData: Client) => {
+  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
+  const handleAddClient = async (client: Client) => {
     try {
-      const response = await fetch('/api/clients', {
+      const response = await fetch(`${API_URL}/api/clients`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(clientData),
+        body: JSON.stringify(client),
       });
-      const data = await response.json();
-      setClients([...clients, data]);
-      setExpandedClients(prev => ({ ...prev, [data.id]: true }));
+      if (!response.ok) {
+        throw new Error('Failed to add client');
+      }
+      const newClient = await response.json();
+      setClients([...clients, newClient]);
+      setExpandedClients(prev => ({ ...prev, [newClient.id]: true }));
       setSnackbar({
         open: true,
         message: 'Client added successfully',
@@ -87,23 +127,26 @@ function App() {
       console.error('Error adding client:', error);
       setSnackbar({
         open: true,
-        message: 'Error adding client',
+        message: 'Failed to add client',
         severity: 'error'
       });
     }
   };
 
-  const handleUpdateClient = async (clientData: Client) => {
+  const handleUpdateClient = async (client: Client) => {
     try {
-      const response = await fetch(`/api/clients/${clientData.id}`, {
+      const response = await fetch(`${API_URL}/api/clients/${client.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(clientData),
+        body: JSON.stringify(client),
       });
-      const data = await response.json();
-      setClients(clients.map(client => client.id === data.id ? data : client));
+      if (!response.ok) {
+        throw new Error('Failed to update client');
+      }
+      const updatedClient = await response.json();
+      setClients(clients.map(c => c.id === client.id ? updatedClient : c));
       setSnackbar({
         open: true,
         message: 'Client updated successfully',
@@ -114,7 +157,7 @@ function App() {
       console.error('Error updating client:', error);
       setSnackbar({
         open: true,
-        message: 'Error updating client',
+        message: 'Failed to update client',
         severity: 'error'
       });
     }
@@ -123,9 +166,12 @@ function App() {
   const handleDeleteClient = async (clientId: string) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
       try {
-        await fetch(`/api/clients/${clientId}`, {
+        const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
           method: 'DELETE',
         });
+        if (!response.ok) {
+          throw new Error('Failed to delete client');
+        }
         setClients(clients.filter(client => client.id !== clientId));
         setSnackbar({
           open: true,
@@ -136,7 +182,7 @@ function App() {
         console.error('Error deleting client:', error);
         setSnackbar({
           open: true,
-          message: 'Error deleting client',
+          message: 'Failed to delete client',
           severity: 'error'
         });
       }
@@ -145,7 +191,7 @@ function App() {
 
   const handleAddKeyword = async (clientId: string, keywordData: { baseKeyword: string; targetResult: string }) => {
     try {
-      const client = clients.find(c => c.id === clientId);
+      const client = clients.find(c => c.id === clientId) as any;
       if (!client) return;
 
       const updatedClient = {
@@ -157,9 +203,9 @@ function App() {
           firstAppearance: { google: null, bing: null, youtube: null },
           lastChecked: null
         }]
-      };
+      } as any;
 
-      const response = await fetch(`/api/clients/${clientId}`, {
+      const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -187,24 +233,12 @@ function App() {
   const handleDeleteKeyword = async (clientId: string, keywordId: string) => {
     if (window.confirm('Are you sure you want to delete this keyword?')) {
       try {
-        const client = clients.find(c => c.id === clientId);
-        if (!client) return;
-
         const updatedClient = {
-          ...client,
-          keywordTracking: client.keywordTracking.filter(k => k.id !== keywordId)
+          ...clients.find(c => c.id === clientId),
+          keywordTracking: clients.find(c => c.id === clientId).keywordTracking.filter(k => k.id !== keywordId)
         };
 
-        const response = await fetch(`/api/clients/${clientId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updatedClient),
-        });
-
-        const data = await response.json();
-        setClients(clients.map(c => c.id === clientId ? data : c));
+        await handleUpdateClient(updatedClient);
         setSnackbar({
           open: true,
           message: 'Keyword deleted successfully',
@@ -214,7 +248,7 @@ function App() {
         console.error('Error deleting keyword:', error);
         setSnackbar({
           open: true,
-          message: 'Error deleting keyword',
+          message: 'Failed to delete keyword',
           severity: 'error'
         });
       }
@@ -223,10 +257,7 @@ function App() {
 
   const handleCheckKeywords = async (clientId: string) => {
     try {
-      const response = await fetch(`/api/clients/${clientId}/check-keywords`, {
-        method: 'POST'
-      });
-
+      const response = await fetch(`${API_URL}/api/clients/${clientId}/check-keywords`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -247,6 +278,11 @@ function App() {
       });
     }
   };
+
+  const filteredClients = clients.filter(client => 
+    client.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    client.contactName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <ThemeProvider theme={theme}>
@@ -462,7 +498,7 @@ function App() {
         autoHideDuration={6000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
-        <Alert severity={snackbar.severity as any}>
+        <Alert severity={snackbar.severity}>
           {snackbar.message}
         </Alert>
       </Snackbar>
