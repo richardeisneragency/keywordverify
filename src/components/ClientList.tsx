@@ -154,15 +154,7 @@ export default function ClientList({ clients, onUpdateClient, onDeleteClient }: 
 
   return (
     <Paper sx={{ width: '100%', mb: 2 }}>
-      <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <TextField
-          label="Search Clients"
-          variant="outlined"
-          size="small"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ width: '300px' }}
-        />
+      <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end' }}>
         <Button
           variant="contained"
           onClick={() => navigate('/add-client')}
@@ -173,6 +165,17 @@ export default function ClientList({ clients, onUpdateClient, onDeleteClient }: 
       <TableContainer>
         <Table>
           <TableHead>
+            <TableRow>
+              <TableCell colSpan={6}>
+                <TextField
+                  placeholder="Search clients..."
+                  size="small"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  sx={{ width: '300px' }}
+                />
+              </TableCell>
+            </TableRow>
             <TableRow>
               <TableCell />
               <TableCell>Company Name</TableCell>

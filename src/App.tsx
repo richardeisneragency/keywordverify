@@ -12,13 +12,15 @@ import {
   Button,
   CircularProgress,
   Tab,
-  Tabs
+  Tabs,
+  TextField
 } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import ClientForm from './components/ClientForm';
 import KeywordTrackingForm from './components/KeywordTrackingForm';
 import AgencySettings from './components/AgencySettings';
+import TestPage from './components/TestPage';
 import { Client, KeywordTracking } from './types';
 import { API_URL } from './config';
 import { api } from './services/api';
@@ -70,7 +72,7 @@ function App() {
     severity: 'success' | 'error';
   }>({ open: false, message: '', severity: 'success' });
   const [expandedClients, setExpandedClients] = useState<Record<string, boolean>>({});
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -234,8 +236,8 @@ function App() {
   };
 
   const filteredClients = clients.filter(client => 
-    client.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.contactName.toLowerCase().includes(searchQuery.toLowerCase())
+    client.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.contactName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -252,6 +254,9 @@ function App() {
           <Button color="inherit" component={Link} to="/settings">
             Settings
           </Button>
+          <Button color="inherit" component={Link} to="/test">
+            Test
+          </Button>
         </Toolbar>
       </AppBar>
 
@@ -259,6 +264,7 @@ function App() {
         <Box sx={{ mt: 4 }}>
           <Routes>
             <Route path="/settings" element={<AgencySettings />} />
+            <Route path="/test" element={<TestPage />} />
             <Route path="/add-client" element={
               <ClientForm onSubmit={handleAddClient} clients={clients} />
             } />
@@ -285,6 +291,17 @@ function App() {
                   >
                     Add Client
                   </Button>
+                </Box>
+
+                <Box sx={{ mb: 3 }}>
+                  <TextField
+                    placeholder="Search clients..."
+                    size="small"
+                    fullWidth
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    sx={{ backgroundColor: 'white' }}
+                  />
                 </Box>
 
                 {error && (
