@@ -11,13 +11,12 @@ import {
   Typography,
   Box,
   Collapse,
-} from '@mui/material';
-import { 
+  TextField,
   Edit as EditIcon, 
   Delete as DeleteIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon
-} from '@mui/icons-material';
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Client } from '../types';
@@ -142,11 +141,27 @@ function Row({ client, onUpdateClient, onDeleteClient }: RowProps) {
 }
 
 export default function ClientList({ clients, onUpdateClient, onDeleteClient }: Props) {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredClients = clients.filter(client => 
+    client.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.contactName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const navigate = useNavigate();
 
   return (
-    <Paper sx={{ width: '100%', mb: 2 }}>
-      <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end' }}>
+    <Box>
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <TextField
+          label="Search Clients"
+          variant="outlined"
+          size="small"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{ width: '300px' }}
+        />
         <Button
           variant="contained"
           onClick={() => navigate('/add-client')}
@@ -154,13 +169,13 @@ export default function ClientList({ clients, onUpdateClient, onDeleteClient }: 
           Add New Client
         </Button>
       </Box>
-      <TableContainer>
+      <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell />
-              <TableCell>Company</TableCell>
-              <TableCell>Contact</TableCell>
+              <TableCell>Company Name</TableCell>
+              <TableCell>Contact Name</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Phone</TableCell>
               <TableCell>Platforms</TableCell>
@@ -169,7 +184,7 @@ export default function ClientList({ clients, onUpdateClient, onDeleteClient }: 
             </TableRow>
           </TableHead>
           <TableBody>
-            {clients.map((client) => (
+            {filteredClients.map((client) => (
               <Row
                 key={client.id}
                 client={client}
@@ -180,6 +195,6 @@ export default function ClientList({ clients, onUpdateClient, onDeleteClient }: 
           </TableBody>
         </Table>
       </TableContainer>
-    </Paper>
+    </Box>
   );
 }
