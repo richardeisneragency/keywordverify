@@ -12,11 +12,13 @@ import {
   Box,
   Collapse,
   TextField,
+} from '@mui/material';
+import { 
   Edit as EditIcon, 
   Delete as DeleteIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
-  KeyboardArrowUp as KeyboardArrowUpIcon
-} from '@mui/material';
+  KeyboardArrowUp as KeyboardArrowUpIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Client } from '../types';
@@ -142,6 +144,7 @@ function Row({ client, onUpdateClient, onDeleteClient }: RowProps) {
 
 export default function ClientList({ clients, onUpdateClient, onDeleteClient }: Props) {
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
 
   const filteredClients = clients.filter(client => 
     client.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -149,11 +152,9 @@ export default function ClientList({ clients, onUpdateClient, onDeleteClient }: 
     client.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const navigate = useNavigate();
-
   return (
-    <Box>
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Paper sx={{ width: '100%', mb: 2 }}>
+      <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <TextField
           label="Search Clients"
           variant="outlined"
@@ -169,7 +170,7 @@ export default function ClientList({ clients, onUpdateClient, onDeleteClient }: 
           Add New Client
         </Button>
       </Box>
-      <TableContainer component={Paper}>
+      <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
@@ -178,8 +179,6 @@ export default function ClientList({ clients, onUpdateClient, onDeleteClient }: 
               <TableCell>Contact Name</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Phone</TableCell>
-              <TableCell>Platforms</TableCell>
-              <TableCell>Keywords</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -195,6 +194,6 @@ export default function ClientList({ clients, onUpdateClient, onDeleteClient }: 
           </TableBody>
         </Table>
       </TableContainer>
-    </Box>
+    </Paper>
   );
 }
