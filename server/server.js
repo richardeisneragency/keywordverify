@@ -9,7 +9,10 @@ const cron = require('node-cron');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['https://keywordverify.com', 'https://www.keywordverify.com', 'http://localhost:3000'],
+  credentials: true
+}));
 app.use(bodyParser.json());
 
 const DATA_FILE = path.join(__dirname, 'data.json');
