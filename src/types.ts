@@ -32,9 +32,9 @@ export interface Client {
   companyName: string;
   contactName: string;
   email: string;
-  emails: string[];
+  emails?: string[];  
   phone: string;
-  notifyClient: boolean;
+  notifyClient?: boolean;  
   platforms: {
     google: boolean;
     bing: boolean;
