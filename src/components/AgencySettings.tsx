@@ -10,6 +10,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
+import { API_URL } from '../config';
 
 interface Settings {
   agencyEmails: string[];
@@ -42,7 +43,7 @@ export default function AgencySettings() {
     console.log('Fetching settings...');
     try {
       setIsLoading(true);
-      const response = await fetch('/api/settings');
+      const response = await fetch(`${API_URL}/api/settings`);
       console.log('Settings response:', response.status);
       if (!response.ok) {
         throw new Error('Failed to fetch settings');
@@ -91,7 +92,7 @@ export default function AgencySettings() {
     console.log('Submitting settings:', settings);
     setIsSaving(true);
     try {
-      const response = await fetch('/api/settings', {
+      const response = await fetch(`${API_URL}/api/settings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
